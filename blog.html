@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog Post</title>
+  <!-- Link to site CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <style>
+    body {
+      background-color: #0a1e3f;
+      color: #f1f1f1;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .blog-detail {
+      max-width: 800px;
+      margin: 60px auto;
+      padding: 30px;
+      background: linear-gradient(135deg, #1a2a4f, #0d1b34);
+      border-radius: 16px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+      animation: fadeInUp 0.6s ease forwards;
+    }
+
+    .blog-img img {
+      width: 100%;
+      height: auto;
+      border-radius: 12px;
+      margin-bottom: 25px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .blog-title {
+      font-size: 2.8em;
+      font-weight: bold;
+      margin-bottom: 12px;
+      color: #ffffff;
+    }
+
+    .blog-meta {
+      font-size: 0.95em;
+      color: #b0c4de;
+      margin-bottom: 25px;
+    }
+
+    .blog-content p {
+      font-size: 1.1em;
+      line-height: 1.8;
+      color: #e4e4e4;
+      margin-bottom: 1.2em;
+    }
+
+    .container {
+      padding: 0 20px;
+    }
+
+    header {
+      padding: 20px 0;
+      background: #091831;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .logo-text {
+      color: #fff;
+      font-size: 1.8em;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .logo-text span {
+      color: #4fc3f7;
+    }
+
+    footer.footer {
+      background-color: #091831;
+      text-align: center;
+      padding: 20px 0;
+      color: #ccc;
+      margin-top: 60px;
+    }
+
+    .blog-tools {
+      margin-top: 30px;
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+    .blog-tools button,
+    .blog-tools a {
+      padding: 8px 14px;
+      background: #4fc3f7;
+      border: none;
+      color: #000;
+      text-decoration: none;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .blog-tools button:hover,
+    .blog-tools a:hover {
+      background: #35b0e2;
+    }
+
+    #scrollTopBtn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #4fc3f7;
+      color: black;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 20px;
+      display: none;
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header id="header">
+    <div class="container">
+      <a href="index.html" class="logo-text">codewithw3s<span>.</span></a>
+    </div>
+  </header>
+
+  <main class="container blog-detail-container">
+    <div id="blog-detail" class="blog-detail">
+      <!-- Blog post content will be injected here -->
+    </div>
+    <div class="blog-tools">
+      <button onclick="copyLink()">📋 Copy Link</button>
+      <a href="#" id="whatsappShare" target="_blank">📲 WhatsApp</a>
+      <a href="#" id="twitterShare" target="_blank">🐦 Twitter</a>
+      <a href="#" id="facebookShare" target="_blank">📘 Facebook</a>
+    </div>
+  </main>
+
+  <!-- Scroll to Top Button -->
+  <button id="scrollTopBtn" onclick="scrollToTop()">↑</button>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; 2025 Creative Portfolio. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- Fetch and render single post -->
+  <script>
+    async function loadBlogPost() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const id = urlParams.get('id');
+      if (!id) {
+        document.getElementById('blog-detail').innerHTML = '<p>Invalid post ID.</p>';
+        return;
+      }
+      try {
+        const res = await fetch(`/api/posts/${id}`);
+        if (!res.ok) throw new Error('Network response was not ok');
+        const post = await res.json();
+        document.getElementById('blog-detail').innerHTML = `
+          <div class="blog-img">
+            <img src="${post.image || 'https://via.placeholder.com/800x400'}" alt="${post.title}" />
+          </div>
+          <h1 class="blog-title">${post.title}</h1>
+          <p class="blog-meta"><strong>Category:</strong> ${post.category} &bull; <em>${new Date().toLocaleDateString()}</em></p>
+          <div class="blog-content">${post.content.split('\n').map(line => `<p>${line}</p>`).join('')}</div>
+        `;
+
+        const url = window.location.href;
+        document.getElementById('whatsappShare').href = `https://api.whatsapp.com/send?text=${encodeURIComponent(url)}`;
+        document.getElementById('twitterShare').href = `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}`;
+        document.getElementById('facebookShare').href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+      } catch (err) {
+        console.error(err);
+        document.getElementById('blog-detail').innerHTML = '<p>Failed to load post.</p>';
+      }
+    }
+
+    function copyLink() {
+      navigator.clipboard.writeText(window.location.href).then(() => {
+        alert("Link copied to clipboard!");
+      });
+    }
+
+    function scrollToTop() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    window.addEventListener('scroll', () => {
+      const btn = document.getElementById('scrollTopBtn');
+      if (window.scrollY > 300) {
+        btn.style.display = 'block';
+      } else {
+        btn.style.display = 'none';
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', loadBlogPost);
+  </script>
+</body>
+</html>
